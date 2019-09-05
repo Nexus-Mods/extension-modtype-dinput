@@ -50,7 +50,7 @@ function init(context: types.IExtensionContext) {
       (instructions: types.IInstruction[]) => new Promise<boolean>((resolve, reject) => {
     if (instructions.find(inst => inst.destination === 'dinput8.dll') !== undefined) {
       remote.dialog.showMessageBox(
-          remote.getCurrentWindow(),
+          (util as any).getVisibleWindow(),
           {
             message: context.api.translate(
                 'The mod you\'re about to install contains dll files that will run with the ' +
