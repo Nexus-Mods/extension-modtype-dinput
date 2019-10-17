@@ -73,7 +73,10 @@ function init(context: types.IExtensionContext) {
     }
   });
 
-  context.registerModType('dinput', 100, gameId => gameId !== 'factorio', getPath, testDinput);
+  (context.registerModType as any)('dinput', 100, gameId => gameId !== 'factorio',
+                                   getPath, testDinput, {
+    mergeMods: true,
+  });
   context.registerInstaller('dinput', 50, testSupported, install);
 
   return true;
