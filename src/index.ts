@@ -46,32 +46,27 @@ function init(context: types.IExtensionContext) {
     }
   };
 
-  const testDinput =
-      (instructions: types.IInstruction[]) => new Promise<boolean>((resolve, reject) => {
-    if (instructions.find(inst => inst.destination === 'dinput8.dll') !== undefined) {
-      remote.dialog.showMessageBox(
+  const testDinput = (instructions: types.IInstruction[]) => {
+      if (instructions.find(inst => inst.destination === 'dinput8.dll') !== undefined) {
+        return remote.dialog.showMessageBox(
           (util as any).getVisibleWindow(),
           {
             message: context.api.translate(
-                'The mod you\'re about to install contains dll files that will run with the ' +
-                'game, have the same access to your system and can thus cause considerable ' +
-                'damage or infect your system with a virus if it\'s malicious.\n' +
-                'Please install this mod only if you received it from a trustworthy source ' +
-                'and if you have a virus scanner active right now.'),
+              'The mod you\'re about to install contains dll files that will run with the ' +
+              'game, have the same access to your system and can thus cause considerable ' +
+              'damage or infect your system with a virus if it\'s malicious.\n' +
+              'Please install this mod only if you received it from a trustworthy source ' +
+              'and if you have a virus scanner active right now.'),
             buttons: ['Cancel', 'Continue'],
             noLink: true,
-          },
-          (response: number) => {
-            if (response === 1) {
-              resolve(true);
-            } else {
-              reject(new util.UserCanceled());
-            }
-          });
+          })
+          .then(result => (result.response === 1)
+             ? Promise.resolve(true)
+             : Promise.reject(new util.UserCanceled()));
     } else {
-      resolve(false);
+      return Promise.resolve(false);
     }
-  });
+  };
 
   (context.registerModType as any)('dinput', 100, gameId => gameId !== 'factorio',
                                    getPath, testDinput, {
