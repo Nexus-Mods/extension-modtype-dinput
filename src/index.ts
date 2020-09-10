@@ -35,6 +35,10 @@ function install(files: string[],
   return Promise.resolve({ instructions });
 }
 
+function gameSupported(gameId: string) {
+  return !['factorio', 'microsoftflightsimulator'].includes(gameId);
+}
+
 function init(context: types.IExtensionContext) {
   const getPath = (game: types.IGame): string => {
     const state: types.IState = context.api.store.getState();
@@ -48,8 +52,8 @@ function init(context: types.IExtensionContext) {
 
   const testDinput = (instructions: types.IInstruction[]) => {
       if (instructions.find(inst => inst.destination === 'dinput8.dll') !== undefined) {
-        return remote.dialog.showMessageBox(
-          (util as any).getVisibleWindow(),
+        return Promise.resolve(remote.dialog.showMessageBox(
+          util.getVisibleWindow(),
           {
             message: context.api.translate(
               'The mod you\'re about to install contains dll files that will run with the ' +
@@ -59,7 +63,7 @@ function init(context: types.IExtensionContext) {
               'and if you have a virus scanner active right now.'),
             buttons: ['Cancel', 'Continue'],
             noLink: true,
-          })
+          }))
           .then(result => (result.response === 1)
              ? Promise.resolve(true)
              : Promise.reject(new util.UserCanceled()));
@@ -68,8 +72,7 @@ function init(context: types.IExtensionContext) {
     }
   };
 
-  (context.registerModType as any)('dinput', 100, gameId => gameId !== 'factorio',
-                                   getPath, testDinput, {
+  context.registerModType('dinput', 100, gameSupported, getPath, testDinput, {
     mergeMods: true,
   });
   context.registerInstaller('dinput', 50, testSupported, install);
