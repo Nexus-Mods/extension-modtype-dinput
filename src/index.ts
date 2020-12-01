@@ -74,6 +74,7 @@ function init(context: types.IExtensionContext) {
 
   context.registerModType('dinput', 100, gameSupported, getPath, testDinput, {
     mergeMods: true,
+    name: 'Engine Injector',
   });
   context.registerInstaller('dinput', 50, testSupported, install);
 
