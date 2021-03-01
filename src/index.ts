@@ -1,7 +1,7 @@
 import Promise from 'bluebird';
 import { remote } from 'electron';
 import * as path from 'path';
-import { types, util } from 'vortex-api';
+import { selectors, types, util } from 'vortex-api';
 
 function testSupported(files: string[]): Promise<types.ISupportedResult> {
   const supported =
@@ -12,25 +12,28 @@ function testSupported(files: string[]): Promise<types.ISupportedResult> {
   });
 }
 
-function makeCopy(basePath: string, filePath: string): types.IInstruction {
+function makeCopy(basePath: string, filePath: string, executablePath: string): types.IInstruction {
   return {
     type: 'copy',
     source: filePath,
-    destination: basePath !== '.' ? filePath.substring(basePath.length + 1) : filePath,
+    destination: path.join(path.dirname(executablePath), path.relative(basePath, filePath)),
   };
 }
 
 function install(files: string[],
                  destinationPath: string,
                  gameId: string,
-                 progressDelegate: types.ProgressDelegate): Promise<types.IInstallResult> {
+                 progressDelegate: types.ProgressDelegate,
+                 api: types.IExtensionApi): Promise<types.IInstallResult> {
   const refFile = files.find(filePath => path.basename(filePath).toLowerCase() === 'dinput8.dll');
+  const state = api.getState();
+  const game: types.IGameStored = selectors.gameById(state, gameId);
   const basePath = path.dirname(refFile);
 
   const instructions: types.IInstruction[] = files
       .filter(filePath => !filePath.endsWith(path.sep)
                           && ((basePath === '.') || filePath.startsWith(basePath + path.sep)))
-          .map(filePath => makeCopy(basePath, filePath));
+          .map(filePath => makeCopy(basePath, filePath, game.executable));
 
   return Promise.resolve({ instructions });
 }
@@ -76,7 +79,9 @@ function init(context: types.IExtensionContext) {
     mergeMods: true,
     name: 'Engine Injector',
   });
-  context.registerInstaller('dinput', 50, testSupported, install);
+  context.registerInstaller('dinput', 50, testSupported,
+    (files, destinationPath, gameId, progressDelegate) =>
+      install(files, destinationPath, gameId, progressDelegate, context.api));
 
   return true;
 }
