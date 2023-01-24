@@ -940,8 +940,8 @@ uri-js@^4.2.2:
     punycode "^2.1.0"
 
 vortex-api@Nexus-Mods/vortex-api:
-  version "1.3.9-r1"
-  resolved "https://codeload.github.com/Nexus-Mods/vortex-api/tar.gz/3d46e4b55981ea94f2da006ec425ed411e2357b1"
+  version "1.8.0-r2"
+  resolved "https://codeload.github.com/Nexus-Mods/vortex-api/tar.gz/18314d002399997d527af6f8923718f2e4e1933b"
 
 vortex-ext-dependencies@Nexus-Mods/vortex-ext-dependencies:
   version "1.0.0"
